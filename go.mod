@@ -6,7 +6,7 @@ require (
 	github.com/ceph/go-ceph v0.0.0-20180104205452-bd5bc6d4cb3e
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/docker/go-connections v0.4.0
-	github.com/dypflying/go-qcow2lib v0.0.0-20230521032359-808baa7bf82d
+	github.com/dypflying/go-qcow2lib v0.0.0-20230529135111-4ae0edd1852a
 	github.com/gorilla/mux v1.8.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/satori/go.uuid v1.2.0
@@ -38,3 +38,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/dypflying/go-qcow2lib v0.0.0-20230529135111-4ae0edd1852a => /Users/Dennis/mywork/go-qcow2lib	

@@ -39,7 +39,7 @@ func (bs *qcow2Store) Open(dev *api.SCSILu, path string) error {
 		qcow2.OPT_FILENAME: path,
 		qcow2.OPT_FMT:      "qcow2",
 	}
-	log.Debugf("open qcow2 path = %s", path)
+	log.Infof("open qcow2 path = %s", path)
 	if bs.child, err = qcow2.Blk_Open(path, open_opts, qcow2.BDRV_O_RDWR); err != nil {
 		return err
 	}
@@ -51,19 +51,23 @@ func (bs *qcow2Store) Open(dev *api.SCSILu, path string) error {
 }
 
 func (bs *qcow2Store) Close(dev *api.SCSILu) error {
+	log.Infof("Close qcow2")
 	qcow2.Blk_Close(bs.child)
 	return nil
 }
 
 func (bs *qcow2Store) Init(dev *api.SCSILu, Opts string) error {
+	log.Infof("Init qcow2 opts = %s", Opts)
 	return nil
 }
 
 func (bs *qcow2Store) Exit(dev *api.SCSILu) error {
+	log.Infof("Exit qcow2")
 	return nil
 }
 
 func (bs *qcow2Store) Size(dev *api.SCSILu) uint64 {
+	log.Infof("Size qcow2")
 	return bs.DataSize
 }
 
@@ -84,13 +88,20 @@ func (bs *qcow2Store) Write(wbuf []byte, offset int64) error {
 }
 
 func (bs *qcow2Store) DataSync(offset, tl int64) error {
+	log.Infof("DataSync qcow2 offset=%d, tl=%d", offset, tl)
+	qcow2.Blk_Flush(bs.child)
 	return nil
 }
 
 func (bs *qcow2Store) DataAdvise(offset, length int64, advise uint32) error {
+	log.Infof("DataAdvise qcow2 offset=%d, length=%d, advise=%d", offset, length, advise)
 	return nil
 }
 
-func (bs *qcow2Store) Unmap([]api.UnmapBlockDescriptor) error {
+func (bs *qcow2Store) Unmap(descs []api.UnmapBlockDescriptor) error {
+	for i := 0; i < len(descs); i++ {
+		log.Infof("Unmap qcow2 offset=%d, tl=%d", descs[i].Offset, descs[i].TL)
+		qcow2.Blk_Discard(bs.child, descs[i].Offset, uint64(descs[i].TL))
+	}
 	return nil
 }
