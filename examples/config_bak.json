@@ -2,9 +2,9 @@
   "storages": [
     {
       "deviceID": 1000,
-      "path": "qcow2:/var/tmp/disk.qcow2",
+      "path": "file:/var/tmp/disk.img",
       "online": true,
-      "thinProvisioning": true,
+      "thinProvisioning": false,
       "blockShift": 9
     }
   ],

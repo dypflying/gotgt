@@ -1,6 +1,8 @@
 module github.com/gostor/gotgt
 
-go 1.18
+go 1.19
+
+replace github.com/dypflying/go-qcow2lib => ../go-qcow2lib
 
 require (
 	github.com/ceph/go-ceph v0.0.0-20180104205452-bd5bc6d4cb3e
@@ -38,5 +40,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/dypflying/go-qcow2lib v0.0.0-20230529135111-4ae0edd1852a => /Users/Dennis/mywork/go-qcow2lib	
+	
