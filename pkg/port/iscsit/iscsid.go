@@ -133,6 +133,25 @@ func (s *ISCSITargetDriver) NewTarget(tgtName string, configInfo *config.Config)
 	return nil
 }
 
+func (s *ISCSITargetDriver) NewTargetEx(tgtName string, tpgtNumber uint16, portal string) error {
+	if _, ok := s.iSCSITargets[tgtName]; ok {
+		return fmt.Errorf("target name has been existed")
+	}
+	stgt, err := s.SCSI.NewSCSITarget(len(s.iSCSITargets), "iscsi", tgtName)
+	if err != nil {
+		return err
+	}
+	tgt := newISCSITarget(stgt)
+	s.iSCSITargets[tgtName] = tgt
+	scsiTPG := tgt.SCSITarget.TargetPortGroups[0]
+
+	tgt.TPGTs[tpgtNumber] = &iSCSITPGT{tpgtNumber, make(map[string]struct{})}
+	targetPortName := fmt.Sprintf("%s,t,0x%02x", tgtName, tpgtNumber)
+	scsiTPG.TargetPortGroup = append(scsiTPG.TargetPortGroup, &api.SCSITargetPort{uint16(tpgtNumber), targetPortName})
+	s.AddiSCSIPortal(tgtName, tpgtNumber, portal)
+	return nil
+}
+
 func (s *ISCSITargetDriver) SetClusterIP(ip string) {
 	s.clusterIP = ip
 }
