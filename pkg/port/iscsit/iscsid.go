@@ -133,7 +133,7 @@ func (s *ISCSITargetDriver) NewTarget(tgtName string, configInfo *config.Config)
 	return nil
 }
 
-func (s *ISCSITargetDriver) NewTargetEx(tgtName string, tpgtNumber uint16, portal string) error {
+func (s *ISCSITargetDriver) NewTargetEx(tgtName string, tpgtNumber uint16, portals []string) error {
 	if _, ok := s.iSCSITargets[tgtName]; ok {
 		return fmt.Errorf("target name has been existed")
 	}
@@ -148,7 +148,9 @@ func (s *ISCSITargetDriver) NewTargetEx(tgtName string, tpgtNumber uint16, porta
 	tgt.TPGTs[tpgtNumber] = &iSCSITPGT{tpgtNumber, make(map[string]struct{})}
 	targetPortName := fmt.Sprintf("%s,t,0x%02x", tgtName, tpgtNumber)
 	scsiTPG.TargetPortGroup = append(scsiTPG.TargetPortGroup, &api.SCSITargetPort{uint16(tpgtNumber), targetPortName})
-	s.AddiSCSIPortal(tgtName, tpgtNumber, portal)
+	for _, portal := range portals {
+		s.AddiSCSIPortal(tgtName, tpgtNumber, portal)
+	}
 	return nil
 }
 
@@ -209,6 +211,27 @@ func (s *ISCSITargetDriver) HasPortal(tgtName string, tpgt uint16, portal string
 	} else {
 		return true
 	}
+}
+
+func (s *ISCSITargetDriver) ListPortals(tgtName string) map[uint16]string {
+	var (
+		ok     bool
+		target *ISCSITarget
+	)
+	portalMap := make(map[uint16]string)
+	if target, ok = s.iSCSITargets[tgtName]; !ok {
+		return portalMap
+	}
+
+	for tpgt, tpgtInfo := range target.TPGTs {
+		tgtPortals := tpgtInfo.Portals
+		portals := make([]string, 0)
+		for portal, _ := range tgtPortals {
+			portals = append(portals, portal)
+		}
+		portalMap[tpgt] = strings.Join(portals, ",")
+	}
+	return portalMap
 }
 
 func (s *ISCSITargetDriver) Run(port int) error {

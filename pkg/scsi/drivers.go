@@ -26,7 +26,8 @@ import (
 type SCSITargetDriver interface {
 	Run(port int) error
 	NewTarget(string, *config.Config) error
-	NewTargetEx(string, uint16, string) error
+	NewTargetEx(string, uint16, []string) error
+	ListPortals(tgtName string) map[uint16]string
 	RereadTargetLUNMap()
 	Close() error
 	Resize(uint64) error
