@@ -234,6 +234,33 @@ func (s *ISCSITargetDriver) ListPortals(tgtName string) map[uint16]string {
 	return portalMap
 }
 
+func (s *ISCSITargetDriver) UpdateiSCSIPortal(tgtName string, portalGroup uint16, portals []string) error {
+	var (
+		ok       bool
+		target   *ISCSITarget
+		tpgtInfo *iSCSITPGT
+	)
+
+	if target, ok = s.iSCSITargets[tgtName]; !ok {
+		return fmt.Errorf("No such target: %s", tgtName)
+	}
+
+	if tpgtInfo, ok = target.TPGTs[portalGroup]; !ok {
+		scsiTPG := target.SCSITarget.TargetPortGroups[0]
+		tpgtInfo = &iSCSITPGT{portalGroup, make(map[string]struct{})}
+		target.TPGTs[portalGroup] = tpgtInfo
+		targetPortName := fmt.Sprintf("%s,t,0x%02x", tgtName, portalGroup)
+		scsiTPG.TargetPortGroup = append(scsiTPG.TargetPortGroup, &api.SCSITargetPort{uint16(portalGroup), targetPortName})
+	}
+
+	newPortalMap := make(map[string]struct{})
+	for _, portal := range portals {
+		newPortalMap[portal] = struct{}{}
+	}
+	tpgtInfo.Portals = newPortalMap
+	return nil
+}
+
 func (s *ISCSITargetDriver) Run(port int) error {
 	l, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {

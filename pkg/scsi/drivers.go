@@ -28,6 +28,7 @@ type SCSITargetDriver interface {
 	NewTarget(string, *config.Config) error
 	NewTargetEx(string, uint16, []string) error
 	ListPortals(tgtName string) map[uint16]string
+	UpdateiSCSIPortal(tgtName string, tpgt uint16, portals []string) error
 	RereadTargetLUNMap()
 	Close() error
 	Resize(uint64) error
