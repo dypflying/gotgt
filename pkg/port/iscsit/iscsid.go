@@ -246,15 +246,25 @@ func (s *ISCSITargetDriver) UpdateiSCSIPortal(tgtName string, portalGroup uint16
 	}
 
 	if tpgtInfo, ok = target.TPGTs[portalGroup]; !ok {
-		scsiTPG := target.SCSITarget.TargetPortGroups[0]
-		tpgtInfo = &iSCSITPGT{portalGroup, make(map[string]struct{})}
+		tpgtInfo = &iSCSITPGT{
+			TPGT:    portalGroup,
+			Portals: make(map[string]struct{}),
+		}
 		target.TPGTs[portalGroup] = tpgtInfo
-		targetPortName := fmt.Sprintf("%s,t,0x%02x", tgtName, portalGroup)
-		scsiTPG.TargetPortGroup = append(scsiTPG.TargetPortGroup, &api.SCSITargetPort{uint16(portalGroup), targetPortName})
+		if scsi.FindTargetGroup(&target.SCSITarget, portalGroup) == 0 {
+			fmt.Printf("can not find target group %d\n", portalGroup)
+			scsiTPG := target.SCSITarget.TargetPortGroups[0]
+			targetPortName := fmt.Sprintf("%s,t,0x%02x", tgtName, portalGroup)
+			scsiTPG.TargetPortGroup = append(scsiTPG.TargetPortGroup, &api.SCSITargetPort{
+				RelativeTargetPortID: uint16(portalGroup),
+				TargetPortName:       targetPortName,
+			})
+		}
 	}
 
 	newPortalMap := make(map[string]struct{})
 	for _, portal := range portals {
+		fmt.Printf("UpdateiSCSIPortal add portal %s\n", portal)
 		newPortalMap[portal] = struct{}{}
 	}
 	tpgtInfo.Portals = newPortalMap
